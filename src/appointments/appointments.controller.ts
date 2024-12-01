@@ -17,6 +17,11 @@ export class AppointmentsController {
     return this.appointmentsService.confirm(id);
   }
 
+  @Post('cancel/:id')
+  cancel(@Param('id') id: string, @Body() admin: any) {
+    return this.appointmentsService.cancel(id, admin);
+  }
+
   @Get()
   findAll() {
     return this.appointmentsService.findAll();

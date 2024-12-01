@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { CreateAppointmentDto } from './dto/create-appointment.dto';
 import { UpdateAppointmentDto } from './dto/update-appointment.dto';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 import { Appointment, AppointmentDocument } from './schema/appointments.schema';
 
 @Injectable()
@@ -17,7 +17,22 @@ export class AppointmentsService {
   }
 
   async findAll() {
-    const allAppointments = await this.appointmentModel.find();
+    const pipeline = [
+      {
+        '$lookup': {
+          'from': 'logins', 
+          'localField': 'profileId', 
+          'foreignField': '_id', 
+          'as': 'profileInfo'
+        }
+      }, {
+        '$unwind': {
+          'path': '$profileInfo', 
+          'preserveNullAndEmptyArrays': true
+        }
+      }
+    ]
+    const allAppointments = await this.appointmentModel.aggregate(pipeline);
     return allAppointments;
   }
 
@@ -55,6 +70,16 @@ export class AppointmentsService {
     const oneAppointment = await this.appointmentModel.findOne({_id: id});
     if (oneAppointment) {
       oneAppointment.confirmed = true;
+      return oneAppointment.save();
+    }
+    throw new Error('Appointment not found');
+  }
+
+  async cancel(id: string, admin: any) {
+    const oneAppointment = await this.appointmentModel.findOne({ _id: id });
+    if (oneAppointment) {
+      oneAppointment.confirmed = false;
+      oneAppointment.cancelledBy = admin.admin;
       return oneAppointment.save();
     }
     throw new Error('Appointment not found');

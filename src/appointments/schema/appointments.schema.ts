@@ -18,5 +18,7 @@ export class Appointment {
   longitude: number;
   @Prop()
   confirmed: boolean;
+  @Prop()
+  cancelledBy: string; 
 }
 export const AppointmentSchema = SchemaFactory.createForClass(Appointment);
