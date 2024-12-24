@@ -10,4 +10,4 @@ COPY . .
 
 EXPOSE 3000
 
-CMD ["node", "main.ts"]
+CMD ["node", "dist/main.js"]
